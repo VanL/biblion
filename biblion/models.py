@@ -40,6 +40,7 @@ class Post(models.Model):
     
     teaser_html = models.TextField(editable=False)
     content_html = models.TextField(editable=False)
+    teaser_in_fulltext = models.BooleanField(default=True)
     
     tweet_text = models.CharField(max_length=140, editable=False)
     
@@ -67,6 +68,11 @@ class Post(models.Model):
         if self.section == 1:
             return ALL_SECTION_NAME
         return dict(zip(range(2, 2 + len(SECTIONS)), ig(SECTIONS, 0)))[self.section]
+
+    @property
+    def fulltext(self):
+        if self.teaser_in_fulltext: return '%s\n%s' % (self.teaser_html, self.more_content_html)
+        else: return self.content_html
     
     def rev(self, rev_id):
         return self.revisions.get(pk=rev_id)
@@ -168,21 +174,31 @@ class Revision(models.Model):
         self.view_count += 1
         self.save()
 
+ 
+try:
+    from photologue.models import Photo as Image
 
-class Image(models.Model):
+    def image_path(): return "images/%Y/%m/%d"
+    if not hasattr(settings, 'PHOTOLOGUE_PATH'):
+        settings.PHOTOLOGUE_PATH = image_path
+
+except ImportError:
+    class Image(models.Model):
     
-    post = models.ForeignKey(Post, related_name="images")
+        post = models.ForeignKey(Post, related_name="images")
     
-    image_path = models.ImageField(upload_to="images/%Y/%m/%d")
-    url = models.CharField(max_length=150, blank=True)
+        image_path = models.ImageField(upload_to="images/%Y/%m/%d")
+
+        url = models.CharField(max_length=150, blank=True)
     
-    timestamp = models.DateTimeField(default=datetime.now, editable=False)
+        timestamp = models.DateTimeField(default=datetime.now, editable=False)
     
-    def __unicode__(self):
-        if self.pk is not None:
-            return "{{ %d }}" % self.pk
-        else:
-            return "deleted image"
+        def __unicode__(self):
+            if self.pk is not None:
+                return "{{ %d }}" % self.pk
+            else:
+                return "deleted image"
+
 
 class FeedHit(models.Model):
     
