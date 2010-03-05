@@ -88,3 +88,44 @@ def blog_sections(parser, token):
     """
     bits = token.split_contents()
     return BlogSectionsNode(bits[2])
+
+
+class LatestFeaturedPostsNode(template.Node):
+
+    def __init__(self, context_var, num_posts=3):
+        self.context_var = context_var
+        self.num_posts = num_posts
+
+    def render(self, context):
+        latest_posts = Post.objects.featured(self.num_posts)
+        context[self.context_var] = latest_posts
+        return u""
+
+
+@register.tag
+def latest_featured_posts(parser, token):
+    bits = token.split_contents()
+    try: return LatestFeaturedPostsNode(bits[2], bits[3])
+    except (TypeError, ValueError): return LatestFeaturedPostsNode(bits[2])
+
+
+class LatestFeaturedPostNode(template.Node):
+
+    def __init__(self, context_var):
+        self.context_var = context_var
+
+    def render(self, context):
+        try:
+            latest_post = Post.objects.featured()[0]
+        except IndexError:
+            latest_post = None
+        context[self.context_var] = latest_post
+        return u""
+
+
+@register.tag
+def latest_featured_post(parser, token):
+    bits = token.split_contents()
+    return LatestFeaturedPostNode(bits[2])
+
+#~
