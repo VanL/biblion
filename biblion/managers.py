@@ -12,6 +12,9 @@ class PostManager(models.Manager):
     
     def current(self):
         return self.published().order_by("-published")
+
+    def featured(self, number=3):
+        return self.published().order_by("-featured", "-published")[:number]
     
     def section(self, value, queryset=None):
         

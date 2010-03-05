@@ -20,21 +20,30 @@ class AdminPostForm(forms.ModelForm):
             attrs = {"style": "width: 50%;"},
         )
     )
-    teaser = forms.CharField(
+    content = forms.CharField(
         widget = forms.Textarea(
             attrs = {"style": "width: 80%;"},
         ),
+        help_text = u"Content that will be displayed on the front page. Could be a the whole post or a teaser.",
     )
-    content = forms.CharField(
+    more_content = forms.CharField(
         widget = forms.Textarea(
             attrs = {"style": "width: 80%; height: 300px;"},
-        )
+        ),
+        help_text = u'Content that will be displayed "below the fold" after a "Read More" link.',
     )
     publish = forms.BooleanField(
         required = False,
-        help_text = u"Checking this will publish this articles on the site",
+        help_text = u"Checking this will publish this article on the site",
     )
-    
+    featured = forms.BooleanField(
+        required = False,
+        help_text = u"Checking this will include this article on the front page",
+    )
+    teaser_in_fulltext = forms.BooleanField(
+        required = False,
+        help_text = u"Checking this will cause the full-text feed and display to include the teaser content above, followed by the content below",
+    )
     if can_tweet():
         tweet = forms.BooleanField(
             required = False,

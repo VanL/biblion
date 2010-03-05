@@ -33,13 +33,14 @@ class Post(models.Model):
     SECTION_CHOICES = [(1, ALL_SECTION_NAME)] + zip(range(2, 2 + len(SECTIONS)), ig(SECTIONS, 1))
     
     section = models.IntegerField(choices=SECTION_CHOICES)
+    featured = models.BooleanField(default=False)
     
     title = models.CharField(max_length=90)
     slug = models.SlugField()
     author = models.ForeignKey(User, related_name="posts")
     
-    teaser_html = models.TextField(editable=False)
     content_html = models.TextField(editable=False)
+    more_content_html = models.TextField(editable=False)
     teaser_in_fulltext = models.BooleanField(default=True)
     
     tweet_text = models.CharField(max_length=140, editable=False)
@@ -71,8 +72,8 @@ class Post(models.Model):
 
     @property
     def fulltext(self):
-        if self.teaser_in_fulltext: return '%s\n%s' % (self.teaser_html, self.more_content_html)
-        else: return self.content_html
+        if self.content_in_fulltext: return '%s\n%s' % (self.content_html, self.more_more_content_html)
+        else: return self.more_content_html
     
     def rev(self, rev_id):
         return self.revisions.get(pk=rev_id)
@@ -156,9 +157,9 @@ class Revision(models.Model):
     post = models.ForeignKey(Post, related_name="revisions")
     
     title = models.CharField(max_length=90)
-    teaser = models.TextField()
-    
     content = models.TextField()
+    
+    more_content = models.TextField()
     
     author = models.ForeignKey(User, related_name="revisions")
     

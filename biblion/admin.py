@@ -5,25 +5,38 @@ from biblion.models import Post, Image
 from biblion.forms import AdminPostForm
 from biblion.utils import can_tweet
 
-
-class ImageInline(admin.TabularInline):
-    model = Image
-    fields = ["image_path"]
+try:
+    from photologue.models import Photo
+    if isinstance(Image, Photo):
+        from photologue.admin import PhotoAdmin as ImageAdmin
+    else:
+        # We are not using Photologue. Fall back
+        raise ImportError
+except ImportError:
+    class ImageAdmin(admin.TabularInline):
+        model = Image
+        fields = ["image_path"]
 
 
 class PostAdmin(admin.ModelAdmin):  
-    list_display = ["title", "published_flag", "section"]
+    list_display = ["title", "published_flag", "section", "featured"]
     list_filter = ["section"]
     form = AdminPostForm
-    fields = [
-        "section",
-        "title",
-        "slug",
-        "author",
-        "teaser",
-        "content",
-        "publish",
-    ]
+    fieldsets = ([None,
+                 {'fields': ["section",
+                             "title",
+                             "slug",
+                             "author",
+                             "content",
+                             "publish",
+                             "featured",
+                              ]
+                  }],
+                  ['Below the fold',
+                  {'classes': ('collapse',),
+                   'fields': ['more_content', 'teaser_in_fulltext']},
+                  ])
+
     if can_tweet():
         fields.append("tweet")
     prepopulated_fields = {"slug": ("title",)}
@@ -57,4 +70,4 @@ class PostAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Post, PostAdmin)
-admin.site.register(Image)
+if not Photo: admin.site.register(Image)

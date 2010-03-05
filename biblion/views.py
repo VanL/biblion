@@ -11,7 +11,7 @@ from django.contrib.sites.models import Site
 
 from biblion.exceptions import InvalidSection
 from biblion.models import Post, FeedHit
-from biblion.settings import ALL_SECTION_NAME
+from biblion.settings import ALL_SECTION_NAME, FULLTEXT_FEED
 
 
 def blog_index(request):
@@ -102,7 +102,7 @@ def blog_feed(request, section=None):
     hit = FeedHit()
     hit.request_data = serialize_request(request)
     hit.save()
-    
+
     atom = render_to_string("biblion/atom_feed.xml", {
         "feed_id": feed_url,
         "feed_title": feed_title,
