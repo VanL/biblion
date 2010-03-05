@@ -27,6 +27,31 @@ def ig(L, i):
     for x in L:
         yield x[i]
 
+try:
+    from photologue.models import Photo as Image
+
+    def image_path(): return "images/%Y/%m/%d"
+    if not hasattr(settings, 'PHOTOLOGUE_PATH'):
+        settings.PHOTOLOGUE_PATH = image_path
+
+except ImportError:
+    class Image(models.Model):
+
+        post = models.ForeignKey(Post, related_name="images")
+
+        image_path = models.ImageField(upload_to="images/%Y/%m/%d")
+
+        url = models.CharField(max_length=150, blank=True)
+
+        timestamp = models.DateTimeField(default=datetime.now, editable=False)
+
+        def __unicode__(self):
+            if self.pk is not None:
+                return "{{ %d }}" % self.pk
+            else:
+                return "deleted image"
+
+
 
 class Post(models.Model):
     
@@ -178,31 +203,6 @@ class Revision(models.Model):
         self.save()
 
  
-try:
-    from photologue.models import Photo as Image
-
-    def image_path(): return "images/%Y/%m/%d"
-    if not hasattr(settings, 'PHOTOLOGUE_PATH'):
-        settings.PHOTOLOGUE_PATH = image_path
-
-except ImportError:
-    class Image(models.Model):
-    
-        post = models.ForeignKey(Post, related_name="images")
-    
-        image_path = models.ImageField(upload_to="images/%Y/%m/%d")
-
-        url = models.CharField(max_length=150, blank=True)
-    
-        timestamp = models.DateTimeField(default=datetime.now, editable=False)
-    
-        def __unicode__(self):
-            if self.pk is not None:
-                return "{{ %d }}" % self.pk
-            else:
-                return "deleted image"
-
-
 class FeedHit(models.Model):
     
     request_data = models.TextField()
