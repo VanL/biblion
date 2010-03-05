@@ -40,10 +40,12 @@ class PostAdmin(admin.ModelAdmin):
     if can_tweet():
         fields.append("tweet")
     prepopulated_fields = {"slug": ("title",)}
-    inlines = [
-        ImageInline,
-    ]
-    
+
+    if Photo:
+        fieldsets[0][1]['fields'].append('images')
+    else:
+        fieldsets[1][1]['inlines'] = [ImageAdmin]
+
     def published_flag(self, obj):
         return bool(obj.published)
     published_flag.short_description = "Published"
